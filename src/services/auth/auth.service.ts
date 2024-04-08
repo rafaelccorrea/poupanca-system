@@ -29,7 +29,7 @@ export class AuthService {
     user: User,
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const payload = {
-      sub: user.id,
+      id: user.id,
       email: user.email,
       name: user.name,
       document: user.cpf,
@@ -51,7 +51,13 @@ export class AuthService {
 
     delete this.refreshTokenStore[userId];
     const user = await this.userService.findById(userId);
-    const payload = { email: user.email, sub: user.id };
+    const payload = {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      document: user.cpf,
+      phone: user.cellphone,
+    };
     const accessToken = this.jwtService.sign(payload, { expiresIn: '1h' });
     return accessToken;
   }
