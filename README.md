@@ -1,73 +1,66 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Mini Poupança - Sistema de Arrecadação de Fundos
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## Objetivo
+O objetivo deste sistema é permitir que os usuários depositem fundos para finalidades específicas, semelhante a uma vaquinha. Os usuários podem realizar depósitos através de diferentes métodos de pagamento, como PIX, cartão de crédito ou boleto bancário. O administrador do sistema terá a responsabilidade de gerenciar os fundos, mas não poderá movimentá-los sem a autorização de pelo menos 50% dos usuários envolvidos.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Funcionalidades Principais
+1. **Administração de Fundos**: O administrador pode gerenciar os fundos arrecadados, mas não pode movimentá-los sem a aprovação de pelo menos 50% dos usuários.
 
-## Description
+2. **Cadastro de Usuários**: Os usuários podem se cadastrar no sistema através de um link de participação. Cada usuário será associado a uma vaquinha específica.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+3. **Depósitos**: Os usuários podem realizar depósitos para as vaquinhas através dos métodos de pagamento disponíveis: PIX, boleto bancário ou cartão de crédito.
 
-## Installation
+4. **Aprovação de Saques**: Para que o administrador possa realizar saques, é necessário que pelo menos 50% dos usuários associados à vaquinha aprovem a retirada.
 
-```bash
-$ yarn install
-```
+## Fluxo de Funcionamento
+1. **Cadastro de Usuários**:
+   - Os usuários recebem um link de participação, onde poderão se cadastrar no sistema.
+   - O link contém o ID da vaquinha a qual o usuário será associado.
 
-## Running the app
+2. **Depósitos**:
+   - Os usuários logam no sistema e escolhem a vaquinha para a qual desejam fazer um depósito.
+   - Eles selecionam o método de pagamento desejado (PIX, boleto ou cartão de crédito) e informam o valor a ser depositado.
+   - Após o pagamento ser processado, o valor é adicionado aos fundos da vaquinha correspondente.
 
-```bash
-# development
-$ yarn run start
+3. **Administração de Fundos**:
+   - O administrador pode visualizar o saldo total de cada vaquinha e monitorar os depósitos realizados.
+   - Para solicitar um saque, o administrador submete a solicitação no sistema.
 
-# watch mode
-$ yarn run start:dev
+4. **Aprovação de Saques**:
+   - Quando uma solicitação de saque é feita pelo administrador, é enviada uma notificação aos usuários associados à vaquinha.
+   - Cada usuário tem a opção de aprovar ou rejeitar o saque.
+   - Se pelo menos 50% dos usuários aprovarem o saque, o administrador pode proceder com a retirada dos fundos.
 
-# production mode
-$ yarn run start:prod
-```
+## Documentação da API
+- Swagger - Ferramenta para documentação de APIs. Será utilizado para documentar a API RESTful do sistema.
 
-## Test
+## Considerações de Segurança
+- Implementar medidas de segurança robustas para proteger os dados dos usuários e as transações financeiras.
+- Utilizar criptografia para garantir a segurança das informações transmitidas.
+- Implementar autenticação e autorização adequadas para garantir que apenas usuários autorizados possam acessar e gerenciar as vaquinhas.
 
-```bash
-# unit tests
-$ yarn run test
+## Passo a Passo para Executar o Projeto
 
-# e2e tests
-$ yarn run test:e2e
+1. **Clonar o Projeto**: 
+   - Abra o terminal e execute o seguinte comando para clonar o projeto:
+     ```
+     git clone https://github.com/rafaelccorrea/poupanca-system.git
+     ```
 
-# test coverage
-$ yarn run test:cov
-```
+2. **Instalar Dependências**:
+   - Após clonar o projeto, navegue até o diretório do projeto no terminal e execute o comando a seguir para instalar as dependências:
+     ```
+     yarn install
+     ```
 
-## Support
+3. **Executar Migrations**:
+   - Com as dependências instaladas, execute o seguinte comando para executar as migrações do banco de dados:
+     ```
+     yarn migration:run
+     ```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+4. **Iniciar o Projeto**:
+   - Por fim, para iniciar o projeto em ambiente de desenvolvimento, execute o seguinte comando:
+     ```
+     yarn start:dev
+     ```
