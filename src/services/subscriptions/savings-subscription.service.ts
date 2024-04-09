@@ -12,21 +12,30 @@ export class SavingsSubscriptionService {
     @InjectRepository(SavingsSubscription)
     private subscriptionRepository: Repository<SavingsSubscription>,
     private userService: UserService,
+    @InjectRepository(Savings)
+    private savingsRepository: Repository<Savings>,
     private connection: Connection,
   ) {}
 
-  async subscribeToSavings(userId: string, savings: Savings): Promise<void> {
+  async subscribeToSavings(userId: string, savingId: number): Promise<void> {
     return await transactionsControll(async () => {
+      const saving = await this.savingsRepository.findOne({
+        where: {
+          id: savingId,
+        },
+      });
+
+      if (!saving) {
+        throw new NotFoundException('Saving not found!');
+      }
+
       const user = await this.userService.findById(userId);
       if (!user) {
         throw new NotFoundException('User not found!');
       }
-      if (!savings) {
-        throw new NotFoundException('Savings not found!');
-      }
 
       const existingSubscription = await this.subscriptionRepository.findOne({
-        where: { user: { id: userId }, savings: { id: savings.id } },
+        where: { user: { id: userId }, savings: { id: savingId } },
       });
 
       if (existingSubscription) {
@@ -35,7 +44,7 @@ export class SavingsSubscriptionService {
 
       const subscription = this.subscriptionRepository.create();
       subscription.user = user;
-      subscription.savings = savings;
+      subscription.savings = saving;
 
       await this.subscriptionRepository.save(subscription);
     }, this.connection);

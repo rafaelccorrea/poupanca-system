@@ -32,12 +32,12 @@ export class SavingsService {
 
       await this.savingsSubscriptionService.subscribeToSavings(
         userId,
-        savedSavings,
+        savedSavings.id,
       );
     }, this.connection);
   }
 
-  async findById(id: number, userId: string): Promise<Savings> {
+  async findByIdAndSubscription(id: number, userId: string): Promise<Savings> {
     const saving = await this.savingsRepository.findOne({
       relations: { transactions: true, subscriptions: true },
       where: {
@@ -58,7 +58,7 @@ export class SavingsService {
   }
 
   async getBalance(savingsId: number, userId: string): Promise<number> {
-    const savings = await this.findById(savingsId, userId);
+    const savings = await this.findByIdAndSubscription(savingsId, userId);
     if (!savings || !savings.transactions) {
       return 0;
     }

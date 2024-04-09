@@ -69,6 +69,7 @@ export class TransactionService {
       }
 
       await this.verifySubscription(userId, transaction.savings.id);
+      await this.checkPendingWithdrawal(userId, transaction.savings.id);
 
       const hasApproved = await this.approvalRepository.findOne({
         where: {
@@ -144,6 +145,25 @@ export class TransactionService {
     return !!subscription;
   }
 
+  private async checkPendingWithdrawal(
+    userId: string,
+    savingsId: number,
+  ): Promise<void> {
+    const pendingWithdrawal = await this.transactionRepository.findOne({
+      where: {
+        user: { id: userId },
+        savings: { id: savingsId },
+        type: TransactionType.WITHDRAWAL,
+      },
+    });
+
+    if (pendingWithdrawal) {
+      throw new BadRequestException(
+        'There is already a pending withdrawal request',
+      );
+    }
+  }
+
   async withdrawFromSavings(
     amount: number,
     userId: string,
@@ -151,20 +171,7 @@ export class TransactionService {
   ): Promise<void> {
     return await transactionsControll(async () => {
       await this.verifySubscription(userId, savingsId);
-
-      const pendingWithdrawal = await this.transactionRepository.findOne({
-        where: {
-          user: { id: userId },
-          savings: { id: savingsId },
-          type: TransactionType.WITHDRAWAL,
-        },
-      });
-
-      if (pendingWithdrawal) {
-        throw new BadRequestException(
-          'There is already a pending withdrawal request',
-        );
-      }
+      await this.checkPendingWithdrawal(userId, savingsId);
 
       const savings = await this.savingsRepository.findOne({
         relations: {
