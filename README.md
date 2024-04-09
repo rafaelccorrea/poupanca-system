@@ -64,3 +64,6 @@ O objetivo deste sistema é permitir que os usuários depositem fundos para fina
      ```
      yarn start:dev
      ```
+
+## Documentação da API
+- Swagger - Ferramenta para documentação de APIs. Você pode acessar a documentação da API em [http://localhost:3000/docs#/](http://localhost:3000/docs#/).
