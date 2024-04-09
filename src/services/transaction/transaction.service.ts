@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Connection } from 'typeorm';
 import { Approval } from '~/database/entities/approval.entity';
@@ -40,8 +44,11 @@ export class TransactionService {
   }
 
   async getAllTransactionsBySavingsId(
+    userId: string,
     savingsId: number,
   ): Promise<Transaction[]> {
+    await this.verifySubscription(userId, savingsId);
+
     return this.transactionRepository.find({
       where: { savings: { id: savingsId } },
     });
@@ -59,6 +66,8 @@ export class TransactionService {
       if (!transaction) {
         throw new Error('Transaction not found');
       }
+
+      await this.verifySubscription(userId, transaction.savings.id);
 
       const hasApproved = await this.approvalRepository.findOne({
         where: {
@@ -84,10 +93,7 @@ export class TransactionService {
     savingsId: number,
   ): Promise<void> {
     return await transactionsControll(async () => {
-      const isSubscribed = await this.isSubscribed(userId, savingsId);
-      if (!isSubscribed) {
-        throw new NotFoundException('User is not subscribed to this savings');
-      }
+      await this.verifySubscription(userId, savingsId);
 
       const savings = await this.savingsRepository.findOne({
         where: { id: savingsId },
@@ -97,7 +103,12 @@ export class TransactionService {
         throw new NotFoundException('Savings not found');
       }
 
-      savings.balance += amount;
+      if (isNaN(amount) || amount <= 0) {
+        throw new BadRequestException('Invalid amount');
+      }
+
+      savings.balance = parseFloat(savings.balance.toString()) + amount;
+
       await this.savingsRepository.save(savings);
       // deposito do valor API https://documenter.getpostman.com/view/12353880/2sA2rDxLu5#intro
       await this.createTransaction(
@@ -109,18 +120,24 @@ export class TransactionService {
     }, this.connection);
   }
 
+  private async verifySubscription(
+    userId: string,
+    savingsId: number,
+  ): Promise<void> {
+    const isSubscribed = await this.isSubscribed(userId, savingsId);
+    if (!isSubscribed) {
+      throw new NotFoundException('User is not subscribed to this savings');
+    }
+  }
+
   private async isSubscribed(
     userId: string,
     savingsId: number,
   ): Promise<boolean> {
     const subscription = await this.subscriptionRepository.findOne({
       where: {
-        user: {
-          id: userId,
-        },
-        savings: {
-          id: savingsId,
-        },
+        user: { id: userId },
+        savings: { id: savingsId },
       },
     });
     return !!subscription;
@@ -132,12 +149,14 @@ export class TransactionService {
     savingsId: number,
   ): Promise<void> {
     return await transactionsControll(async () => {
+      await this.verifySubscription(userId, savingsId);
+
       const savings = await this.savingsRepository.findOne({
         where: { id: savingsId },
       });
 
       if (!savings) {
-        throw new Error('Savings not found');
+        throw new NotFoundException('Savings not found');
       }
 
       if (savings.owner.id !== userId) {

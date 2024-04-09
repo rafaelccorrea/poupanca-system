@@ -5,6 +5,7 @@ import { Savings } from '~/database/entities/savings.entity';
 import { SavingsSubscriptionService } from '../subscriptions/savings-subscription.service';
 import { UserService } from '../user/user.service';
 import { transactionsControll } from '~/helpers/controll.transactions';
+import { TransactionType } from '../transaction/types/enum';
 
 @Injectable()
 export class SavingsService {
@@ -58,9 +59,16 @@ export class SavingsService {
 
   async getBalance(savingsId: number, userId: string): Promise<number> {
     const savings = await this.findById(savingsId, userId);
-    return savings.transactions.reduce(
-      (total, transaction) => total + transaction.amount,
-      0,
-    );
+    if (!savings || !savings.transactions) {
+      return 0;
+    }
+    return savings.transactions.reduce((total, transaction) => {
+      if (transaction.type === TransactionType.DEPOSIT) {
+        return total + parseFloat(transaction.amount.toString());
+      } else if (transaction.type === TransactionType.WITHDRAWAL) {
+        return total - parseFloat(transaction.amount.toString());
+      }
+      return total;
+    }, 0);
   }
 }

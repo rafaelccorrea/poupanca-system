@@ -34,8 +34,13 @@ export class TransactionController {
   @Get('savings/:savingsId')
   async getAllTransactionsBySavingsId(
     @Param('savingsId') savingsId: number,
+    @Request() req,
   ): Promise<Transaction[]> {
-    return this.transactionService.getAllTransactionsBySavingsId(savingsId);
+    const userId = req.user.id;
+    return this.transactionService.getAllTransactionsBySavingsId(
+      userId,
+      savingsId,
+    );
   }
 
   @UseGuards(JwtAuthGuard)
@@ -57,8 +62,10 @@ export class TransactionController {
   @Post('deposit')
   async depositToSavings(
     @Body() createTransactionDto: CreateTransactionDto,
+    @Request() req,
   ): Promise<void> {
-    const { amount, userId, savingsId } = createTransactionDto;
+    const { amount, savingsId } = createTransactionDto;
+    const userId = req.user.id;
     return this.transactionService.depositToSavings(amount, userId, savingsId);
   }
 
@@ -69,8 +76,10 @@ export class TransactionController {
   @Post('withdraw')
   async withdrawFromSavings(
     @Body() createTransactionDto: CreateTransactionDto,
+    @Request() req,
   ): Promise<void> {
-    const { amount, userId, savingsId } = createTransactionDto;
+    const userId = req.user.id;
+    const { amount, savingsId } = createTransactionDto;
     return this.transactionService.withdrawFromSavings(
       amount,
       userId,
