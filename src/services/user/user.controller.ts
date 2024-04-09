@@ -1,17 +1,23 @@
 import { Controller, Post, Body, BadRequestException } from '@nestjs/common';
-import { ApiTags, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiOperation,
+} from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from '~/database/entities/user.entity';
 
-@ApiTags('Users')
+@ApiTags('Usuários')
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('register')
-  @ApiResponse({ status: 201, description: 'Usuário registrado com sucesso' })
-  @ApiResponse({ status: 400, description: 'Dados de entrada inválidos' })
+  @ApiOperation({ summary: 'Registrar um novo usuário' })
+  @ApiCreatedResponse({ description: 'Usuário registrado com sucesso' })
+  @ApiBadRequestResponse({ description: 'Dados de entrada inválidos' })
   async register(@Body() createUserDto: CreateUserDto): Promise<User> {
     const { name, email, password, cellphone, cpf } = createUserDto;
 

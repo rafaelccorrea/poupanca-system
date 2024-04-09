@@ -1,23 +1,24 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { JwtModule } from '@nestjs/jwt';
-import { AuthController } from './services/auth/auth.controller';
-import { AuthService } from './services/auth/auth.service';
-import { UserController } from './services/user/user.controller';
-import { UserService } from './services/user/user.service';
 import { DatabaseModule } from './database/database.module';
 import { User } from './database/entities/user.entity';
+import { SavingsModule } from './services/savings/savings.module';
+import { TransactionModule } from './services/transaction/transaction.module';
+import { UserModule } from './services/user/user.module';
+import { AuthModule } from './services/auth/auth.module';
+import { SavingsSubscriptionModule } from './services/subscriptions/savings-subscription.module';
 
 @Module({
   imports: [
     DatabaseModule,
     TypeOrmModule.forFeature([User]),
-    JwtModule.register({
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '1h' },
-    }),
+    AuthModule,
+    UserModule,
+    SavingsModule,
+    TransactionModule,
+    SavingsSubscriptionModule,
   ],
-  controllers: [AuthController, UserController],
-  providers: [AuthService, UserService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}

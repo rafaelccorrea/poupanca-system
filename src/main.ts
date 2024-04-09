@@ -36,6 +36,7 @@ async function bootstrap() {
     .setTitle('Vaquinha')
     .setDescription('Poupança')
     .setVersion('1.0')
+    .addBearerAuth()
     .addTag('v1')
     .build();
 

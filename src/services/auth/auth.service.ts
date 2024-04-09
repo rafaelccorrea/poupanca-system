@@ -35,7 +35,11 @@ export class AuthService {
       document: user.cpf,
       phone: user.cellphone,
     };
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '1h' }); // Token expira em 1 hora
+    const accessToken = this.jwtService.sign(payload, {
+      expiresIn: '1h',
+      secret: process.env.JWT_SECRET,
+    });
+
     const refreshToken = this.generateRefreshToken(user.id);
     return { accessToken, refreshToken };
   }
@@ -58,7 +62,10 @@ export class AuthService {
       document: user.cpf,
       phone: user.cellphone,
     };
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '1h' });
+    const accessToken = this.jwtService.sign(payload, {
+      expiresIn: '1h',
+      secret: process.env.JWT_SECRET,
+    });
     return accessToken;
   }
 
