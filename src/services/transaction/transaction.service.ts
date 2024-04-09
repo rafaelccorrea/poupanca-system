@@ -188,8 +188,14 @@ export class TransactionService {
         throw new Error('User is not the owner of this savings');
       }
 
-      const totalUsers = await this.approvalRepository.count({
-        where: { savings: { id: savingsId } },
+      const totalUsers = await this.savingsRepository.count({
+        where: {
+          subscriptions: {
+            savings: {
+              id: savingsId,
+            },
+          },
+        },
       });
 
       const approvalsCount = await this.approvalRepository.count({
