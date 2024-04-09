@@ -35,7 +35,7 @@ export class SavingsController {
   async createSavings(
     @Body() createSavingsDto: CreateSavingsDto,
     @Req() req: Request,
-  ): Promise<Savings> {
+  ): Promise<void> {
     const { name } = createSavingsDto;
     const ownerId = req.user.id;
     return await this.savingsService.createSavings(name, ownerId);

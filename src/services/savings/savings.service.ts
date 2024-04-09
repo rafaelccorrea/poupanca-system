@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Savings } from '~/database/entities/savings.entity';
 import { SavingsSubscriptionService } from '../subscriptions/savings-subscription.service';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class SavingsService {
@@ -10,27 +11,34 @@ export class SavingsService {
     @InjectRepository(Savings)
     private savingsRepository: Repository<Savings>,
     private savingsSubscriptionService: SavingsSubscriptionService,
+    private userService: UserService,
   ) {}
 
-  async createSavings(name: string, ownerId: string): Promise<Savings> {
-    const savings = this.savingsRepository.create({
-      name,
-      owner: { id: ownerId },
-    });
+  async createSavings(name: string, userId: string): Promise<void> {
+    const user = await this.userService.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found!');
+    }
 
-    await this.savingsSubscriptionService.subscribeToSavings(ownerId, savings);
+    const savings = new Savings();
+    savings.name = name;
+    savings.owner = user;
 
-    return this.savingsRepository.save(savings);
+    const savedSavings = await this.savingsRepository.save(savings);
+
+    await this.savingsSubscriptionService.subscribeToSavings(
+      userId,
+      savedSavings,
+    );
   }
-
-  async findById(id: number, ownerId: string): Promise<Savings> {
+  async findById(id: number, userId: string): Promise<Savings> {
     const saving = await this.savingsRepository.findOne({
       relations: { transactions: true, subscriptions: true },
       where: {
         id,
         subscriptions: {
           user: {
-            id: ownerId,
+            id: userId,
           },
         },
       },
@@ -43,8 +51,8 @@ export class SavingsService {
     return saving;
   }
 
-  async getBalance(savingsId: number, ownerId: string): Promise<number> {
-    const savings = await this.findById(savingsId, ownerId);
+  async getBalance(savingsId: number, userId: string): Promise<number> {
+    const savings = await this.findById(savingsId, userId);
     return savings.transactions.reduce(
       (total, transaction) => total + transaction.amount,
       0,
