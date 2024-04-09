@@ -80,10 +80,6 @@ export class TransactionController {
   ): Promise<void> {
     const userId = req.user.id;
     const { amount, savingsId } = createTransactionDto;
-    return this.transactionService.withdrawFromSavings(
-      amount,
-      userId,
-      savingsId,
-    );
+    return this.transactionService.requestWithdrawal(amount, userId, savingsId);
   }
 }

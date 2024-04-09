@@ -3,7 +3,7 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
 export class Transaction1712639577141 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `CREATE TYPE "transaction_type_enum" AS ENUM ('withdrawal', 'deposit')`,
+      `CREATE TYPE "transaction_type_enum" AS ENUM ('withdrawal', 'deposit', 'request_withdrawal)`,
     );
 
     await queryRunner.query(

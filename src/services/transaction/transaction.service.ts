@@ -164,7 +164,7 @@ export class TransactionService {
     }
   }
 
-  async withdrawFromSavings(
+  async requestWithdrawal(
     amount: number,
     userId: string,
     savingsId: number,
@@ -173,20 +173,25 @@ export class TransactionService {
       await this.verifySubscription(userId, savingsId);
       await this.checkPendingWithdrawal(userId, savingsId);
 
-      const savings = await this.savingsRepository.findOne({
-        relations: {
-          owner: true,
-        },
-        where: { id: savingsId },
+      const withdrawalRequest = await this.createTransaction(
+        amount,
+        userId,
+        savingsId,
+        TransactionType.REQUEST_WITHDRAWAL,
+      );
+
+      this.monitorApproval(withdrawalRequest.id, savingsId);
+    }, this.connection);
+  }
+
+  private async monitorApproval(
+    transactionId: number,
+    savingsId: number,
+  ): Promise<void> {
+    const interval = setInterval(async () => {
+      const approvalsCount = await this.approvalRepository.count({
+        where: { savings: { id: savingsId } },
       });
-
-      if (!savings) {
-        throw new NotFoundException('Savings not found');
-      }
-
-      if (savings.owner.id !== userId) {
-        throw new Error('User is not the owner of this savings');
-      }
 
       const totalUsers = await this.savingsRepository.count({
         where: {
@@ -198,25 +203,41 @@ export class TransactionService {
         },
       });
 
-      const approvalsCount = await this.approvalRepository.count({
-        where: { savings: { id: savingsId } },
-      });
-
       if (approvalsCount >= totalUsers / 2) {
-        const balance = await this.savingsService.getBalance(savingsId, userId);
-        if (amount > balance) {
-          throw new Error('Insufficient funds in savings');
-        }
-        // saque do valor API https://documenter.getpostman.com/view/12353880/2sA2rDxLu5#intro
-        await this.createTransaction(
-          amount,
-          userId,
-          savingsId,
-          TransactionType.WITHDRAWAL,
-        );
-      } else {
-        throw new Error('Insufficient approvals for withdrawal');
+        clearInterval(interval);
+        await this.confirmWithdrawal(transactionId);
       }
-    }, this.connection);
+    }, 5000); // Verificar a cada 5 segundos
+  }
+
+  async confirmWithdrawal(transactionId: number): Promise<void> {
+    const transaction = await this.transactionRepository.findOne({
+      where: {
+        id: transactionId,
+        type: TransactionType.WITHDRAWAL,
+      },
+      relations: { savings: true },
+    });
+
+    if (!transaction) {
+      throw new NotFoundException('Transaction not found');
+    }
+
+    const balance = await this.savingsService.getBalance(
+      transaction.savings.id,
+      transaction.user.id,
+    );
+    if (transaction.amount > balance) {
+      throw new Error('Insufficient funds in savings');
+    }
+
+    await this.createTransaction(
+      transaction.amount,
+      transaction.user.id,
+      transaction.savings.id,
+      TransactionType.WITHDRAWAL,
+    );
+
+    // colocar um socket para emitir evento para saque automatico apos 50% das aprovações.
   }
 }
