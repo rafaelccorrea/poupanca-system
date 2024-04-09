@@ -3,6 +3,10 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
 export class Transaction1712639577141 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
+      `CREATE TYPE "transaction_type_enum" AS ENUM ('withdrawal', 'deposit')`,
+    );
+
+    await queryRunner.query(
       `CREATE TABLE "transaction" ("id" SERIAL NOT NULL, "amount" numeric(10,2) NOT NULL, "type" character varying NOT NULL, "userId" uuid, "savingsId" integer, CONSTRAINT "PK_89eadb93a89810556e1cbcd6ab9" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
@@ -14,6 +18,7 @@ export class Transaction1712639577141 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`DROP TYPE "transaction_type_enum"`);
     await queryRunner.query(
       `ALTER TABLE "transaction" DROP CONSTRAINT "FK_f58b6dbf7a57158d080c135c835"`,
     );
