@@ -60,9 +60,10 @@ export class TransactionService {
   ): Promise<void> {
     return await transactionsControll(async () => {
       const transaction = await this.transactionRepository.findOne({
-        where: { id: transactionId },
-        relations: ['savings'],
+        where: { id: transactionId, type: TransactionType.WITHDRAWAL },
+        relations: { savings: true },
       });
+
       if (!transaction) {
         throw new Error('Transaction not found');
       }
@@ -151,7 +152,24 @@ export class TransactionService {
     return await transactionsControll(async () => {
       await this.verifySubscription(userId, savingsId);
 
+      const pendingWithdrawal = await this.transactionRepository.findOne({
+        where: {
+          user: { id: userId },
+          savings: { id: savingsId },
+          type: TransactionType.WITHDRAWAL,
+        },
+      });
+
+      if (pendingWithdrawal) {
+        throw new BadRequestException(
+          'There is already a pending withdrawal request',
+        );
+      }
+
       const savings = await this.savingsRepository.findOne({
+        relations: {
+          owner: true,
+        },
         where: { id: savingsId },
       });
 

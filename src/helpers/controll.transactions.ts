@@ -1,4 +1,5 @@
 import { Connection } from 'typeorm';
+import { HttpException, HttpStatus } from '@nestjs/common';
 
 export async function transactionsControll(
   operation: () => Promise<any>,
@@ -14,7 +15,13 @@ export async function transactionsControll(
     return result;
   } catch (e) {
     await queryRunner.rollbackTransaction();
-    throw e;
+    throw new HttpException(
+      {
+        status: HttpStatus.BAD_REQUEST,
+        error: e.message,
+      },
+      HttpStatus.BAD_REQUEST,
+    );
   } finally {
     await queryRunner.release();
   }
