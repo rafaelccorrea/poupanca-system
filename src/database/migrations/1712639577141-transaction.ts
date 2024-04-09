@@ -7,7 +7,7 @@ export class Transaction1712639577141 implements MigrationInterface {
     );
 
     await queryRunner.query(
-      `CREATE TABLE "transaction" ("id" SERIAL NOT NULL, "amount" numeric(10,2) NOT NULL, "type" character varying NOT NULL, "userId" uuid, "savingsId" integer, CONSTRAINT "PK_89eadb93a89810556e1cbcd6ab9" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "transaction" ("id" SERIAL NOT NULL, "amount" numeric(10,2) NOT NULL, "type" "transaction_type_enum" NOT NULL, "userId" uuid, "savingsId" integer, CONSTRAINT "PK_89eadb93a89810556e1cbcd6ab9" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
       `ALTER TABLE "transaction" ADD CONSTRAINT "FK_b5ccf9206f6c161d04d27c5153c" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
